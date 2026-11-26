@@ -1,19 +1,27 @@
 package net.caffeinemc.phosphor.mixin.chunk;
 
 import net.caffeinemc.phosphor.common.chunk.light.IReadonly;
-import net.minecraft.world.chunk.ChunkNibbleArray;
+import net.minecraft.world.level.chunk.DataLayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 /**
- * An optimized implementation of ChunkNibbleArray which uses bit-banging instead of a conditional to select
+ * An optimized implementation of DataLayer which uses bit-banging instead of a conditional to select
  * the right bit index of a nibble.
  */
-@Mixin(ChunkNibbleArray.class)
+@Mixin(DataLayer.class)
 public abstract class MixinChunkNibbleArray implements IReadonly {
     @Shadow
-    protected byte[] bytes;
+    protected byte[] data;
+
+    @Shadow
+    private int defaultValue;
+
+    @Shadow
+    private static byte pack(int value) {
+        throw new AssertionError();
+    }
 
     /**
      * @reason Avoid an additional branch.
@@ -21,10 +29,10 @@ public abstract class MixinChunkNibbleArray implements IReadonly {
      */
     @Overwrite
     public int get(int idx) {
-        byte[] arr = this.bytes;
+        byte[] arr = this.data;
 
         if (arr == null) {
-            return 0;
+            return this.defaultValue;
         }
 
         int byteIdx = idx >> 1;
@@ -40,13 +48,16 @@ public abstract class MixinChunkNibbleArray implements IReadonly {
     @Overwrite
     private void set(int idx, int value) {
         if (this.isReadonly()) {
-            throw new UnsupportedOperationException("Cannot modify readonly ChunkNibbleArray");
+            throw new UnsupportedOperationException("Cannot modify readonly DataLayer");
         }
 
-        byte[] arr = this.bytes;
+        byte[] arr = this.data;
 
         if (arr == null) {
-            this.bytes = (arr = new byte[2048]);
+            this.data = (arr = new byte[2048]);
+            if (this.defaultValue != 0) {
+                java.util.Arrays.fill(arr, pack(this.defaultValue));
+            }
         }
 
         int byteIdx = idx >> 1;
