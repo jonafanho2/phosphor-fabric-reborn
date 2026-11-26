@@ -4,13 +4,13 @@ import it.unimi.dsi.fastutil.ints.IntIterable;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.caffeinemc.phosphor.common.chunk.light.BlockLightStorageAccess;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.world.chunk.ChunkNibbleArray;
-import net.minecraft.world.chunk.light.BlockLightStorage;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.chunk.DataLayer;
+import net.minecraft.world.level.lighting.BlockLightSectionStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-@Mixin(BlockLightStorage.class)
+@Mixin(BlockLightSectionStorage.class)
 public abstract class MixinBlockLightStorage extends MixinLightStorage implements BlockLightStorageAccess {
     @Unique
     private final LongSet lightEnabled = new LongOpenHashSet();
@@ -26,17 +26,17 @@ public abstract class MixinBlockLightStorage extends MixinLightStorage implement
 
     @Override
     public boolean isLightEnabled(final long sectionPos) {
-        return this.lightEnabled.contains(ChunkSectionPos.withZeroY(sectionPos));
+        return this.lightEnabled.contains(SectionPos.getZeroNode(sectionPos));
     }
 
     @Override
-    protected int getLightmapComplexityChange(final long blockPos, final int oldVal, final int newVal, final ChunkNibbleArray lightmap) {
+    protected int getLightmapComplexityChange(final long blockPos, final int oldVal, final int newVal, final DataLayer lightmap) {
         return newVal - oldVal;
     }
 
     @Override
-    protected int getInitialLightmapComplexity(final long sectionPos, final ChunkNibbleArray lightmap) {
-        if (lightmap.isUninitialized()) {
+    protected int getInitialLightmapComplexity(final long sectionPos, final DataLayer lightmap) {
+        if (lightmap.isEmpty()) {
             return 0;
         }
 
