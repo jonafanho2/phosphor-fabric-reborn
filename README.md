@@ -1,6 +1,6 @@
 <img src="src/main/resources/assets/phosphor/icon.png" width="128">
 
-# Phosphor (for Fabric)
+# Phosphor (for Fabric/NeoForge)
 ![GitHub license](https://img.shields.io/github/license/CaffeineMC/phosphor-fabric.svg)
 ![GitHub issues](https://img.shields.io/github/issues/CaffeineMC/phosphor-fabric.svg)
 ![GitHub tag](https://img.shields.io/github/v/tag/CaffeineMC/phosphor-fabric.svg)
